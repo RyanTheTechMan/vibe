@@ -189,7 +189,7 @@ const Navbar = () => {
             </NavbarContent>
 
             {/* Mobile Menu */}
-            <NavbarMenu>
+            <NavbarMenu className="scrollbar-hide">
                 {/* Search Input */}
                 <NavbarMenuItem>{searchInput}</NavbarMenuItem>
 
