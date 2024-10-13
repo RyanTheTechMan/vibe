@@ -6,7 +6,6 @@ import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/input";
 import { FaPaperPlane } from "react-icons/fa";
 import {Card, CardHeader, CardBody, CardFooter} from "@nextui-org/card";
-import SuccessErrorMessage from "./SuccessErrorMessage";
 
 type Name = {
     id: number;
@@ -131,7 +130,7 @@ const DashboardClient = ({ initialNames }: { initialNames: Name[] }) => {
 
             {/* Display Success or Error Messages */}
             {error && <p className="mt-4 text-red-500 text-center">{error}</p>}
-            {isSubmitted && <SuccessErrorMessage type="success" message="Name submitted successfully!" />}
+            {isSubmitted && <p className="mt-4 text-green-500 text-center">{"Name submitted successfully!"}</p>}
 
             {/* List of Submitted Names */}
             <div className="mt-8 w-full max-w-md">
