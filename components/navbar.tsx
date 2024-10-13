@@ -9,14 +9,14 @@ import {
     NavbarItem,
     NavbarMenuItem,
 } from "@nextui-org/navbar";
+import { Button } from "@nextui-org/button";
+import { Input } from "@nextui-org/input";
 import {
-    Button,
-    Input,
     Dropdown,
     DropdownTrigger,
     DropdownMenu,
-    DropdownItem,
-} from "@nextui-org/react";
+    DropdownItem
+} from "@nextui-org/dropdown"
 import NextLink from "next/link";
 import clsx from "clsx";
 import { FaUserCircle } from "react-icons/fa";

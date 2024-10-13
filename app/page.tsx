@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, Input, Spinner } from "@nextui-org/react";
+import { Spinner } from "@nextui-org/spinner";
+import { Button } from "@nextui-org/button";
+import { Input } from "@nextui-org/input";
 import { FaPaperPlane } from "react-icons/fa";
 
 export default function Home() {
