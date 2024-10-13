@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import getPool from '../../lib/db';
 import { RowDataPacket } from 'mysql2/promise';
 
-const PAGE_SIZE = 3;
+import { NAMES_PAGE_SIZE as PAGE_SIZE } from '../../../config/constants';
 
 type Name = RowDataPacket & {
     id: number;

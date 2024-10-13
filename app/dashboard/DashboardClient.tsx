@@ -1,22 +1,9 @@
-'use client';
-
-import React, { Suspense, useState, useEffect } from "react";
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { Suspense } from "react";
 import Form from "./Form";
-import NamesList from "./NamesList";
-import SkeletonLoader from "./SkeletonLoader";
+import NamesList from "./components/NamesList";
+import SkeletonLoader from "./components/SkeletonLoader";
 
 const DashboardClient = () => {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-
-    const [currentPage, setCurrentPage] = useState(1);
-
-    useEffect(() => {
-        const pageParam = searchParams.get('page');
-        const page = pageParam && !isNaN(parseInt(pageParam)) && parseInt(pageParam) > 0 ? parseInt(pageParam) : 1;
-        setCurrentPage(page);
-    }, [searchParams]);
 
     return (
         <div className="flex flex-col items-center justify-center w-full">

@@ -1,0 +1,1 @@
+export const NAMES_PAGE_SIZE = 3;
