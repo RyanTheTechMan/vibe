@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
 import {
     Navbar as NextUINavbar,
-    NavbarContent,
-    NavbarMenu,
-    NavbarMenuToggle,
     NavbarBrand,
+    NavbarContent,
     NavbarItem,
+    NavbarMenu,
     NavbarMenuItem,
+    NavbarMenuToggle,
 } from "@nextui-org/navbar";
 import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/input";
@@ -36,7 +36,7 @@ type UserDropdownItem = {
     className?: string;
 };
 
-export const Navbar = () => {
+const Navbar = () => {
     const pathname = usePathname();
     const router = useRouter();
 
@@ -155,30 +155,34 @@ export const Navbar = () => {
             {/* Right Section (Mobile) */}
             <NavbarContent className="lg:hidden flex items-center justify-end space-x-2">
                 {/* Theme Switch */}
-                <ThemeSwitch />
+                <NavbarItem>
+                    <ThemeSwitch />
+                </NavbarItem>
 
                 {/* User Profile Dropdown */}
-                <Dropdown>
-                    <DropdownTrigger>
-                        <Button
-                            variant="light" // Correctly using 'light' variant
-                            isIconOnly
-                            aria-label="User Profile"
+                <NavbarItem>
+                    <Dropdown>
+                        <DropdownTrigger>
+                            <Button
+                                variant="light" // Correctly using 'light' variant
+                                isIconOnly
+                                aria-label="User Profile"
+                            >
+                                <FaUserCircle className="text-xl" />
+                            </Button>
+                        </DropdownTrigger>
+                        <DropdownMenu
+                            aria-label="User Actions"
+                            onAction={(key) => handleProfileDropdownAction(key as string)}
                         >
-                            <FaUserCircle className="text-xl" />
-                        </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                        aria-label="User Actions"
-                        onAction={(key) => handleProfileDropdownAction(key as string)}
-                    >
-                        {userDropdownItems.map((item) => (
-                            <DropdownItem key={item.key} className={item.className} color={item.color}>
-                                {item.label}
-                            </DropdownItem>
-                        ))}
-                    </DropdownMenu>
-                </Dropdown>
+                            {userDropdownItems.map((item) => (
+                                <DropdownItem key={item.key} className={item.className} color={item.color}>
+                                    {item.label}
+                                </DropdownItem>
+                            ))}
+                        </DropdownMenu>
+                    </Dropdown>
+                </NavbarItem>
 
                 {/* Hamburger Menu Toggle */}
                 <NavbarMenuToggle />
@@ -209,3 +213,5 @@ export const Navbar = () => {
         </NextUINavbar>
     );
 };
+
+export default Navbar;
