@@ -63,7 +63,6 @@ const NamesList = () => {
     }, [page]);
 
     const goToPage = (newPage: number) => {
-        // Ensure the new page is within valid range
         if (pagination) {
             const validPage = Math.min(Math.max(newPage, 1), pagination.totalPages);
             router.push(`/?page=${validPage}`);
@@ -71,9 +70,9 @@ const NamesList = () => {
     };
 
     return (
-        <div>
-            {/* Display the list of names or loading/error states */}
-            <div>
+        <div className="container mx-auto flex flex-col min-h-[37vh] p-4">
+            {/* Main Content Area */}
+            <div className="flex-grow">
                 {loading && <SkeletonLoader />}
                 {error && <p className="text-red-500">{error}</p>}
                 {!loading && !error && (
@@ -93,28 +92,23 @@ const NamesList = () => {
 
             {/* Pagination Controls */}
             {pagination && (
-                <div className="flex items-center justify-between mt-4">
-                    {/* Previous Button */}
+                <div className="flex items-center justify-between mt-4 py-4 border-t border-gray-200">
                     <Button
                         onClick={() => goToPage(pagination.currentPage - 1)}
-                        disabled={pagination.currentPage === 1 || loading}
-                        variant="solid"
+                        isDisabled={pagination.currentPage === 1}
                         color="primary"
                         isIconOnly
                     >
                         <FaBackward />
                     </Button>
 
-                    {/* Page Information */}
                     <span>
                         Page {pagination.currentPage} of {pagination.totalPages}
                     </span>
 
-                    {/* Next Button */}
                     <Button
                         onClick={() => goToPage(pagination.currentPage + 1)}
-                        disabled={pagination.currentPage === pagination.totalPages || loading}
-                        variant="solid"
+                        isDisabled={pagination.currentPage === pagination.totalPages || loading}
                         color="primary"
                         isIconOnly
                     >
