@@ -152,8 +152,8 @@ const Navbar = () => {
                 </NavbarItem>
             </NavbarContent>
 
-            {/* Right Section (Mobile) */}
-            <NavbarContent className="lg:hidden flex items-center justify-end space-x-2">
+            {/* Right Section (Mobile)*/}
+            <NavbarContent className="lg:hidden space-x-2" justify="end">
                 {/* Theme Switch */}
                 <NavbarItem>
                     <ThemeSwitch />
