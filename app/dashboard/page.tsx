@@ -1,5 +1,5 @@
 import React from 'react';
-import DashboardClient from './dashboard/DashboardClient';
+import DashboardClient from './DashboardClient';
 
 export default function DashboardPage() {
     return (
