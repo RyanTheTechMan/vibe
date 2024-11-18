@@ -1,10 +1,8 @@
 import React from 'react';
-import DashboardClient from './dashboard/DashboardClient';
+import DashboardPage from "@/app/dashboard/page";
 
-export default function DashboardPage() {
+export default function Page() {
     return (
-        <div>
-            <DashboardClient />
-        </div>
+        <DashboardPage />
     );
 }

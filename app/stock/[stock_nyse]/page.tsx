@@ -1,9 +1,20 @@
 import React, { Suspense } from 'react';
 import { Stock, StockSchema } from '@/db/types';
+import { API_BASE_URL } from "@/app/api/route_helper";
+
+export default function StockPage ({ params }: { params: { stock_nyse: string } }) {
+    const { stock_nyse } = params;
+
+    return (
+        <Suspense fallback={<div>Loading stock data...</div>}>
+            <StockInfo stock_nyse={stock_nyse} />
+        </Suspense>
+    );
+}
 
 function StockInfo({ stock_nyse }: { stock_nyse: string }) {
     async function fetchStockData(stock_nyse: string): Promise<Stock> {
-        const response = await fetch(process.env.NEXT_PUBLIC_API_BASE_URL + `/stocks/${stock_nyse}`);
+        const response = await fetch(API_BASE_URL + `/stocks/${stock_nyse}`);
         if (!response.ok) throw new Error('Failed to fetch stock data');
 
         try {
@@ -24,15 +35,5 @@ function StockInfo({ stock_nyse }: { stock_nyse: string }) {
             <p>Symbol: {stockData.abbreviation}</p>
             <p>ID: {stockData.id}</p>
         </div>
-    );
-}
-
-export default function Page({ params }: { params: { stock_nyse: string } }) {
-    const { stock_nyse } = params;
-
-    return (
-        <Suspense fallback={<div>Loading stock data...</div>}>
-            <StockInfo stock_nyse={stock_nyse} />
-        </Suspense>
     );
 }
