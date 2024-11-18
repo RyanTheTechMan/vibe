@@ -2,6 +2,8 @@ import React, { Suspense } from 'react';
 import { Stock, StockSchema } from '@/db/types';
 import { API_BASE_URL } from "@/app/api/route_helper";
 
+export const runtime = 'edge';
+
 export default function StockPage ({ params }: { params: { stock_nyse: string } }) {
     const { stock_nyse } = params;
 
