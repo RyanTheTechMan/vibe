@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import {Image} from "@nextui-org/image";
 import {BsFillQuestionCircleFill} from "react-icons/bs";
 import {Avatar} from "@nextui-org/avatar";
+import MiniStockChart from "@/app/stock/components/mini-chart";
 
 export function StockTable() {
     const router = useRouter();
@@ -85,7 +86,7 @@ export function StockTable() {
                 <TableColumn key="abbreviation" width={40} align='center'>Abbreviation</TableColumn>
                 <TableColumn key='logo' width={76} align='center'>Logo</TableColumn>
                 <TableColumn key="name" align='start' width={40}>Name</TableColumn>
-                <TableColumn key="mini-chart" align='center'>Mini Chart</TableColumn>
+                <TableColumn key="chart" align='center' width={120}>Price Chart</TableColumn>
                 <TableColumn key="price" align='end'>Price</TableColumn>
                 <TableColumn key="volume" align='end'>Volume</TableColumn>
             </TableHeader>
@@ -94,7 +95,7 @@ export function StockTable() {
                 items={list.items}
                 loadingContent={
                     <TableRow>
-                        <TableCell colSpan={5} className="text-center">
+                        <TableCell colSpan={7} className="text-center">
                             <Spinner color="primary"/>
                         </TableCell>
                     </TableRow>
@@ -106,7 +107,7 @@ export function StockTable() {
                         onClick={() => handleRowClick(stock.abbreviation)}
                         className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
-                        <TableCell>{stock.id}</TableCell>
+                        <TableCell>{<p className='text-yellow-600'>{stock.id}</p>}</TableCell>
                         <TableCell>{stock.abbreviation}</TableCell>
                         <TableCell>
                             <Avatar
@@ -120,9 +121,26 @@ export function StockTable() {
                         </TableCell>
                         <TableCell>{stock.name ?? 'N/A'}</TableCell>
                         <TableCell>
-                            <div className="w-full h-full">
-                                <Spinner color='warning'/>
-                            </div>
+                            {/*<div className="w-full h-full">*/}
+                            {/*    <Spinner color='warning'/>*/}
+                            {/*</div>*/}
+                            <MiniStockChart
+                                width={120}
+                                height={50}
+                                lines={[{
+                                    id: 'line1',
+                                    data: [
+                                        {date: '2023-01-01', close: Math.random()* 100}, {date: '2023-01-02', close: Math.random()* 100},
+                                        {date: '2023-01-03', close: Math.random()* 100}, {date: '2023-01-04', close: Math.random()* 100},
+                                        {date: '2023-01-05', close: Math.random()* 100}, {date: '2023-01-06', close: Math.random()* 100},
+                                        {date: '2023-01-07', close: Math.random()* 100}, {date: '2023-01-08', close: Math.random()* 100},
+                                        {date: '2023-01-09', close: Math.random()* 100}, {date: '2023-01-10', close: Math.random()* 100},
+                                        {date: '2023-01-11', close: Math.random()* 100}, {date: '2023-01-12', close: Math.random()* 100},
+                                    ],
+                                    strokeColor: '#359bd8'
+                                }
+                            ]}
+                            />
                         </TableCell>
                         <TableCell>{stock.price ?? 'N/A'}</TableCell>
                         <TableCell>{stock.volume ?? 'N/A'}</TableCell>
