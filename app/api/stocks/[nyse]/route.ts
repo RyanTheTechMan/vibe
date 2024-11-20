@@ -23,6 +23,6 @@ export async function GET(request: NextRequest, { params }: { params: { nyse: st
         return successResponse(result[0], undefined, 200);
     } catch (error: any) {
         console.error('Error fetching Stock:', error);
-        return errorResponse('Server error while fetching Events.', 500);
+        return errorResponse('Server error while fetching Stock.', 500, error);
     }
 }

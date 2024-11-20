@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         return successResponsePaginated(result, nextCursor, undefined, 200);
     } catch (error: any) {
         console.error('Error fetching Stock:', error);
-        return errorResponse('Server error while fetching Stocks.', 500);
+        return errorResponse('Server error while fetching Stocks.', 500, error);
     }
 }
 
