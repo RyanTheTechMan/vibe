@@ -47,9 +47,9 @@ children,
           <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
             {children}
           </main>
-          <footer className="w-full flex items-center justify-center py-3">
-            <span className="text-default-600">Designed at Roanoke College</span>
-          </footer>
+            <footer className="w-full flex items-center justify-center py-3">
+                <a href="https://logo.dev" aria-label="Logo API" className='text-gray-500'>Logos provided by Logo.dev</a>
+            </footer>
         </div>
       </Providers>
       </body>

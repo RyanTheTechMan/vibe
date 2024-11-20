@@ -11,7 +11,7 @@ export async function GET(request: NextRequest, { params }: { params: { nyse: st
         const stock_nyse_id = params.nyse.toUpperCase();
 
         const result = await sql`
-            SELECT id, abbreviation FROM stock WHERE abbreviation = ${stock_nyse_id};
+            SELECT * FROM stock WHERE abbreviation = ${stock_nyse_id};
         `;
 
         await new Promise(resolve => setTimeout(resolve, 1500));

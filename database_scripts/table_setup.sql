@@ -10,6 +10,7 @@
 
 CREATE TABLE stock (
     id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
     abbreviation VARCHAR(10) UNIQUE NOT NULL
 );
 

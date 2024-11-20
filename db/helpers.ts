@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 /**
  * Builds a dynamic SET clause for SQL UPDATE statements.
@@ -57,16 +58,29 @@ export function validateId(params: { id: string | string[] }): number | NextResp
     return tagId;
 }
 
-
 /**
  * Generates a standardized success response.
- * @param data The data to include in the response.
+ * @param content The data to include in the response.
  * @param message Optional success message.
  * @param status Optional HTTP status code (default: 200).
  * @returns A NextResponse object with the success payload.
  */
-export function successResponse(data: any, message: string = 'Success', status: number = 200): NextResponse {
-    return NextResponse.json({ success: true, message, data }, { status });
+export function successResponse(content: any, message: string = 'Success', status: number = 200): NextResponse {
+    const responseBody: APIResponse = { success: true, message, content };
+    return NextResponse.json(responseBody, { status });
+}
+
+/**
+ * Generates a standardized success response with pagination.
+ * @param content The data to include in the response.
+ * @param nextCursor The cursor for the next page of results.
+ * @param message Optional success message.
+ * @param status Optional HTTP status code (default: 200).
+ * @returns A NextResponse object with the success payload.
+ */
+export function successResponsePaginated(content: any, nextCursor: number | null, message: string = 'Success', status: number = 200): NextResponse {
+    const responseBody: APIResponsePaginated = { success: true, message, content, nextCursor };
+    return NextResponse.json(responseBody, { status });
 }
 
 /**
@@ -77,7 +91,20 @@ export function successResponse(data: any, message: string = 'Success', status: 
  * @returns A NextResponse object with the error payload.
  */
 export function errorResponse(message: string, status: number, errors?: any): NextResponse {
-    const responseBody: any = { success: false, message };
+    const responseBody: APIResponse = { success: false, message };
     if (errors) responseBody.errors = errors;
     return NextResponse.json(responseBody, { status });
 }
+
+export const APIResponseSchema = z.object({
+    success: z.boolean(),
+    message: z.string().optional(),
+    content: z.any().optional(),
+    errors: z.any().optional(),
+});
+export type APIResponse = z.infer<typeof APIResponseSchema>;
+
+export const APIResponsePaginatedSchema = APIResponseSchema.extend({
+    nextCursor: z.coerce.number().int().nullable(),
+});
+export type APIResponsePaginated = z.infer<typeof APIResponsePaginatedSchema>;
