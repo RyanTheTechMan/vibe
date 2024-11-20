@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { sql } from '@/db/db';
-import {errorResponse, successResponsePaginated} from '@/db/helpers';
+import { errorResponse, successResponsePaginated } from '@/db/helpers';
 import { z } from 'zod';
 
 export const runtime = 'edge';
@@ -26,8 +26,6 @@ export async function GET(request: NextRequest) {
     `;
 
         const nextCursor: number | null = start + pageSize < (await getTotalStocks()) ? start + pageSize : null;
-
-        // await new Promise(resolve => setTimeout(resolve, 500));
 
         return successResponsePaginated(result, nextCursor, undefined, 200);
     } catch (error: any) {
