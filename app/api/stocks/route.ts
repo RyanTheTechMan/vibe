@@ -7,6 +7,8 @@ export const runtime = 'edge';
 
 const StockFiltersSchema = z.object({
     cursor: z.coerce.number().int().optional(),
+    sort: z.enum(['trending', 'name', 'id']).default('id'),
+    sortDirection: z.enum(['ascending', 'descending']).default('descending'),
 });
 type StockFilters = z.infer<typeof StockFiltersSchema>;
 
@@ -19,11 +21,30 @@ export async function GET(request: NextRequest) {
         const pageSize = 10;
         let start: number = isNaN(filters.cursor as number) ? 0 : filters.cursor as number;
 
-        const result = await sql`
-            SELECT *
-            FROM stock
-            LIMIT ${pageSize} OFFSET ${start};
-    `;
+        const orderBy = {
+            'trending': 'volume',
+            'name': 'name',
+            'id': 'id',
+        }[filters.sort];
+
+        let result;
+
+        if (filters.sortDirection === 'ascending') {
+            result = await sql`
+                SELECT *
+                FROM stock
+                ORDER BY ${orderBy} ASC
+                LIMIT ${pageSize} OFFSET ${start}
+            `;
+        }
+        else {
+            result = await sql`
+                SELECT *
+                FROM stock
+                ORDER BY ${orderBy} DESC
+                LIMIT ${pageSize} OFFSET ${start}
+            `;
+        }
 
         const nextCursor: number | null = start + pageSize < (await getTotalStocks()) ? start + pageSize : null;
 
