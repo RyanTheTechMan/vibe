@@ -35,6 +35,8 @@ CREATE TABLE source (
     id SERIAL PRIMARY KEY,
     url TEXT UNIQUE NOT NULL,
 
+    date_fetched TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
     source_origin_id INTEGER NOT NULL,
     FOREIGN KEY (source_origin_id) REFERENCES source_origin(id),
 
@@ -47,7 +49,7 @@ CREATE TABLE source (
     CONSTRAINT sentiment_opinion CHECK (predicted_sentiment_score IS NULL OR predicted_opinion_score IS NULL OR predicted_sentiment_score IS NOT NULL AND predicted_opinion_score IS NOT NULL)
 );
 
-CREATE TABLE stocks_source (
+CREATE TABLE stocks_source ( -- TODO: Rename to stock_sources
     stock_id INTEGER NOT NULL,
     FOREIGN KEY (stock_id) REFERENCES stock(id),
 
@@ -57,3 +59,18 @@ CREATE TABLE stocks_source (
 
 COMMENT ON COLUMN source.predicted_sentiment_score IS 'A number between -1 and 1';
 COMMENT ON COLUMN source.predicted_opinion_score IS 'A number between 0 and 1';
+
+CREATE TABLE earnings_report (
+    id               SERIAL PRIMARY KEY,
+
+    stock_id         INTEGER        NOT NULL,
+    FOREIGN KEY (stock_id) REFERENCES stock (id),
+
+    date             DATE           NOT NULL,
+    UNIQUE (stock_id, date),
+
+    eps_estimate     DECIMAL(10, 2) NOT NULL, -- May be dropped
+    eps_actual       DECIMAL(10, 2) NOT NULL,
+
+    surprise_percent DECIMAL(10, 2) NOT NULL
+);
