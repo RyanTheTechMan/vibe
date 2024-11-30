@@ -10,9 +10,17 @@
 
 CREATE TABLE stock (
     id SERIAL PRIMARY KEY,
+    abbreviation VARCHAR(10) UNIQUE NOT NULL,
     name VARCHAR(100) NOT NULL,
-    abbreviation VARCHAR(10) UNIQUE NOT NULL
+
+    cached_live_data JSONB,
+    updated_at_live_data TIMESTAMP WITH TIME ZONE,
+    cached_time_series_data JSONB,
+    updated_at_time_series_data TIMESTAMP WITH TIME ZONE
 );
+
+COMMENT ON COLUMN stock.abbreviation IS 'The source of truth for the stocks ticker symbol. This should RARELY change if at all.';
+COMMENT ON COLUMN stock.name IS 'The human readable name of the stock.';
 
 -- CREATE TABLE owned_stock (
 --     user_id INTEGER NOT NULL,

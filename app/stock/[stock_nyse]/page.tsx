@@ -27,7 +27,7 @@ function StockInfo({ stock_nyse }: { stock_nyse: string }) {
 
             return await StockSchema.parseAsync(data.content);
         } catch (error: any) {
-            console.error(error);
+            // console.error(error);
             throw new Error('Failed to parse stock data.' + error?.message);
         }
     }
