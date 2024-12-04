@@ -83,8 +83,6 @@ async function fetchLiveDataFromAPI(symbol: string): Promise<LiveData | null> {
 
         const data = await response.json();
 
-
-        console.log("raw response:", data);
         if (data.status === 'error') {
             throw new Error(`TwelveData API error: ${data.message}`);
         }
