@@ -22,14 +22,32 @@ export async function GET(request: NextRequest) {
         const pageSize = 4; // Adjust as needed
         const start: number = isNaN(filters.cursor as number) ? 0 : (filters.cursor as number);
 
-        // Fetch stock abbreviations and names
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 30);
+
+        const endDate = new Date();
+
         const staticResult = await sql`
-            SELECT id, abbreviation, name, 
-                   GetStockSentimentScore(stock.id, DATE '2024-01-01', DATE(NOW())) as sentiment_score,
-                   GetStockBiasScore(stock.id, DATE '2024-01-01', DATE(NOW())) as bias_score
-            FROM stock
-            ORDER BY id
-            LIMIT ${pageSize} OFFSET ${start};
+        SELECT
+            id,
+            abbreviation,
+            name,
+            GetStockSentimentScore(
+                stock.id,
+                ${startDate.toISOString()},
+                ${endDate.toISOString()}
+            ) AS sentiment_score,
+            GetStockBiasScore(
+                stock.id,
+                ${startDate.toISOString()},
+                ${endDate.toISOString()}
+            ) AS bias_score
+        FROM stock
+        ORDER BY
+            sentiment_score DESC NULLS LAST,
+            bias_score ASC
+        LIMIT ${pageSize}
+        OFFSET ${start};
         `;
 
         if (staticResult.length === 0) {
@@ -41,10 +59,8 @@ export async function GET(request: NextRequest) {
         for (const stock of staticResult) {
             const liveData: LiveData | null = await fetchLiveData(stock.abbreviation);
 
-            // Fetch cached time series data without forcing an update
             const timeSeriesData = await fetchTimeSeriesData(stock.abbreviation, '1day', 30);
 
-            // Build the stock object conforming to StockSchema
             const stockData: Stock = {
                 id: stock.id,
                 abbreviation: stock.abbreviation,
