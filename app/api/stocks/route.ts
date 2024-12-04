@@ -7,7 +7,7 @@ import {
     fetchTimeSeriesData,
     LiveData,
 } from './cache';
-import { StockSchema } from '@/db/types';
+import {Stock, StockSchema} from '@/db/types';
 
 export const runtime = 'edge';
 
@@ -24,7 +24,9 @@ export async function GET(request: NextRequest) {
 
         // Fetch stock abbreviations and names
         const staticResult = await sql`
-            SELECT id, abbreviation, name
+            SELECT id, abbreviation, name, 
+                   GetStockSentimentScore(stock.id, DATE '2024-01-01', DATE(NOW())) as sentiment_score,
+                   GetStockBiasScore(stock.id, DATE '2024-01-01', DATE(NOW())) as bias_score
             FROM stock
             ORDER BY id
             LIMIT ${pageSize} OFFSET ${start};
@@ -43,7 +45,7 @@ export async function GET(request: NextRequest) {
             const timeSeriesData = await fetchTimeSeriesData(stock.abbreviation, '1day', 30);
 
             // Build the stock object conforming to StockSchema
-            const stockData = {
+            const stockData: Stock = {
                 id: stock.id,
                 abbreviation: stock.abbreviation,
                 name: stock.name,
@@ -55,6 +57,8 @@ export async function GET(request: NextRequest) {
                 change: liveData?.change,
                 percent_change: liveData?.percent_change,
                 ...(timeSeriesData && { timeSeries: timeSeriesData }),
+                avg_sentiment: stock.sentiment_score,
+                avg_bias: stock.bias_score,
             };
 
             const validatedStockData = StockSchema.parse(stockData);

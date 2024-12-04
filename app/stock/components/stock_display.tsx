@@ -1,5 +1,3 @@
-// stock_display.tsx
-
 'use client';
 
 import React from 'react';
@@ -21,7 +19,7 @@ import { useRouter } from 'next/navigation';
 import { Avatar } from "@nextui-org/avatar";
 import MiniStockChart from "@/app/stock/components/mini-chart";
 import clsx from "clsx";
-import {FaChevronDown, FaChevronUp} from "react-icons/fa";
+import {FaChevronDown, FaChevronRight, FaChevronUp} from "react-icons/fa";
 
 export function StockTable() {
     const router = useRouter();
@@ -71,6 +69,141 @@ export function StockTable() {
         return volume.toLocaleString();
     };
 
+    // Helper function to determine color and icon for % Change with more steps
+    const getPercentChangeStyle = (percentChange: number) => {
+        if (percentChange < -5) {
+            return {
+                color: 'text-red-700', // Very Negative
+                Icon: FaChevronDown,
+            };
+        } else if (percentChange < -2) {
+            return {
+                color: 'text-red-500', // Negative
+                Icon: FaChevronDown,
+            };
+        } else if (percentChange < 5) {
+            return {
+                color: 'text-green-500', // Positive
+                Icon: FaChevronUp,
+            };
+        } else {
+            return {
+                color: 'text-green-500', // Very Positive
+                Icon: FaChevronUp,
+            };
+        }
+    };
+
+// Helper function to determine color and icon for Sentiment with more steps
+    const getSentimentStyle = (sentiment: number) => {
+        if (sentiment < -0.6) {
+            return {
+                color: 'text-red-700', // Very Negative
+                Icon: FaChevronDown,
+            };
+        } else if (sentiment < -0.1) {
+            return {
+                color: 'text-red-500', // Negative
+                Icon: FaChevronDown,
+            };
+        } else if (sentiment < 0.1) {
+            return {
+                color: 'text-yellow-500', // Neutral
+                Icon: FaChevronRight, // Indicating minimal sentiment
+            };
+        } else if (sentiment < 0.6) {
+            return {
+                color: 'text-green-500', // Positive
+                Icon: FaChevronUp,
+            };
+        } else {
+            return {
+                color: 'text-green-700', // Very Positive
+                Icon: FaChevronUp,
+            };
+        }
+    };
+
+// Helper function to determine color and icon for Bias with more steps
+    const getBiasStyle = (bias: number) => {
+        if (bias < 0.2) {
+            return {
+                color: 'text-green-700', // Very Low Bias
+                Icon: FaChevronDown,
+            };
+        } else if (bias < 0.4) {
+            return {
+                color: 'text-green-500', // Low Bias
+                Icon: FaChevronDown,
+            };
+        } else if (bias < 0.6) {
+            return {
+                color: 'text-yellow-700', // Moderate Bias
+                Icon: FaChevronRight, // Indicating balanced bias
+            };
+        } else if (bias < 0.8) {
+            return {
+                color: 'text-orange-500', // High Bias
+                Icon: FaChevronUp,
+            };
+        } else {
+            return {
+                color: 'text-red-700', // Very High Bias
+                Icon: FaChevronUp,
+            };
+        }
+    };
+
+    // Helper function to render % Change
+    const renderPercentChange = (percentChange: number | null | undefined) => {
+        if (percentChange === null || percentChange === undefined) {
+            return <Spinner color='primary' size='sm' />;
+        }
+
+        const { color, Icon } = getPercentChangeStyle(percentChange);
+
+        return (
+            <span className={clsx(color)} style={{ display: 'flex', alignItems: 'center' }}>
+                <Icon />
+                <span className="ml-1">{`${percentChange.toFixed(2)}%`}</span>
+            </span>
+        );
+    };
+
+    // Helper function to render Sentiment
+    const renderSentiment = (sentiment: number | null | undefined) => {
+        if (sentiment === null || sentiment === undefined) {
+            return <Spinner color='primary' size='sm' />;
+        }
+
+        const { color, Icon } = getSentimentStyle(sentiment);
+        const isPositive = sentiment >= 0;
+
+        return (
+            <span className={clsx(color)} style={{ display: 'flex', alignItems: 'center' }}>
+                <Icon />
+                <span className="ml-1">{sentiment.toFixed(2)}</span>
+            </span>
+        );
+    };
+
+    // Helper function to render Bias
+    const renderBias = (bias: number | null | undefined) => {
+        if (bias === null || bias === undefined) {
+            return <Spinner color='primary' size='sm' />;
+        }
+
+        const { color, Icon } = getBiasStyle(bias);
+        const isLowBias = bias < 0.5;
+
+        return (
+            <span className={clsx(color)} style={{ display: 'flex', alignItems: 'center' }}>
+                <Icon />
+                <span className="ml-1">{bias.toFixed(2)}</span>
+            </span>
+        );
+    };
+
     return (
         <Table
             aria-label="Stock Table"
@@ -99,12 +232,10 @@ export function StockTable() {
                 <TableColumn key="name" align='start' width={40}>Name</TableColumn>
                 <TableColumn key="percent_change" align='start' width={40}>% Change</TableColumn>
                 <TableColumn key="chart" align='center' width={120}>Price Chart (30d)</TableColumn>
-                <TableColumn key="price" align='end'>Price</TableColumn>
-                <TableColumn key="volume" align='end'>Volume</TableColumn>
-                <TableColumn key="open" align='end'>Open</TableColumn>
-                <TableColumn key="high" align='end'>High</TableColumn>
-                <TableColumn key="low" align='end'>Low</TableColumn>
-                <TableColumn key="change" align='end'>Change</TableColumn>
+                <TableColumn key="price" align='start'>Price</TableColumn>
+                <TableColumn key="volume" align='start'>Volume</TableColumn>
+                <TableColumn key="sentiment" align='start'>Sentiment</TableColumn>
+                <TableColumn key="bias" align='start'>Bias</TableColumn>
             </TableHeader>
             <TableBody
                 isLoading={isLoading}
@@ -139,14 +270,7 @@ export function StockTable() {
                         </TableCell>
                         <TableCell>{stock.name ?? 'N/A'}</TableCell>
                         <TableCell>
-                            {stock.percent_change !== null && stock.percent_change !== undefined ? (
-                                <span className={clsx(stock.percent_change >= 0 ? 'text-green-500' : 'text-red-500')} style={{ display: 'flex', alignItems: 'center' }}>
-                                    {stock.percent_change >= 0 ? <FaChevronUp /> : <FaChevronDown />}
-                                    <span className="ml-1">{`${stock.percent_change.toFixed(2)}%`}</span>
-                                </span>
-                            ) : (
-                                <Spinner color='primary' size='sm' />
-                            )}
+                            {renderPercentChange(stock.percent_change)}
                         </TableCell>
                         <TableCell>
                             {stock.timeSeries && stock.timeSeries.length > 0 ? (
@@ -177,25 +301,12 @@ export function StockTable() {
                                 : <Spinner color='primary' size='sm' />}
                         </TableCell>
                         <TableCell>
-                            {stock.open !== null && stock.open !== undefined
-                                ? formatPrice(stock.open)
-                                : <Spinner color='primary' size='sm' />}
+                            {renderSentiment(stock.avg_sentiment)}
                         </TableCell>
                         <TableCell>
-                            {stock.high !== null && stock.high !== undefined
-                                ? formatPrice(stock.high)
-                                : <Spinner color='primary' size='sm' />}
+                            {renderBias(stock.avg_bias)}
                         </TableCell>
-                        <TableCell>
-                            {stock.low !== null && stock.low !== undefined
-                                ? formatPrice(stock.low)
-                                : <Spinner color='primary' size='sm' />}
-                        </TableCell>
-                        <TableCell>
-                            {stock.change !== null && stock.change !== undefined
-                                ? formatPrice(stock.change)
-                                : <Spinner color='primary' size='sm' />}
-                        </TableCell>
+
                     </TableRow>
                 )}
             </TableBody>

@@ -68,17 +68,17 @@ CREATE TABLE stocks_source ( -- TODO: Rename to stock_sources
 COMMENT ON COLUMN source.predicted_sentiment_score IS 'A number between -1 and 1';
 COMMENT ON COLUMN source.predicted_opinion_score IS 'A number between 0 and 1';
 
-CREATE TABLE earnings_report (
-    id               SERIAL PRIMARY KEY,
-
-    stock_id         INTEGER        NOT NULL,
-    FOREIGN KEY (stock_id) REFERENCES stock (id),
-
-    date             DATE           NOT NULL,
-    UNIQUE (stock_id, date),
-
-    eps_estimate     DECIMAL(10, 2) NOT NULL, -- May be dropped
-    eps_actual       DECIMAL(10, 2) NOT NULL,
-
-    surprise_percent DECIMAL(10, 2) NOT NULL
-);
+-- CREATE TABLE earnings_report (
+--     id               SERIAL PRIMARY KEY,
+--
+--     stock_id         INTEGER        NOT NULL,
+--     FOREIGN KEY (stock_id) REFERENCES stock (id),
+--
+--     date             DATE           NOT NULL,
+--     UNIQUE (stock_id, date),
+--
+--     eps_estimate     DECIMAL(10, 2) NOT NULL, -- May be dropped
+--     eps_actual       DECIMAL(10, 2) NOT NULL,
+--
+--     surprise_percent DECIMAL(10, 2) NOT NULL
+-- );

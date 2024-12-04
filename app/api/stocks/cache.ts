@@ -15,6 +15,7 @@ export interface LiveData {
     low?: number | null;
     change?: number | null;
     percent_change?: number | null;
+    name?: string | null;
 }
 
 export interface TimeSeriesDataPoint {
@@ -62,7 +63,6 @@ export async function fetchLiveData(symbol: string): Promise<LiveData | null> {
     const liveData = await fetchLiveDataFromAPI(symbol);
 
     if (liveData) {
-        // Update cache
         await setCachedLiveData(symbol, liveData);
         return liveData;
     }
@@ -83,6 +83,8 @@ async function fetchLiveDataFromAPI(symbol: string): Promise<LiveData | null> {
 
         const data = await response.json();
 
+
+        console.log("raw response:", data);
         if (data.status === 'error') {
             throw new Error(`TwelveData API error: ${data.message}`);
         }
@@ -96,6 +98,7 @@ async function fetchLiveDataFromAPI(symbol: string): Promise<LiveData | null> {
                 low: parseFloat(data.low) || null,
                 change: parseFloat(data.change) || null,
                 percent_change: parseFloat(data.percent_change) || null,
+                name: data.name,
             };
         }
 
@@ -130,10 +133,13 @@ async function getCachedLiveData(abbreviation: string): Promise<{ data: LiveData
 }
 
 async function setCachedLiveData(abbreviation: string, data: LiveData): Promise<void> {
+    const name = data.name ?? null;
+    delete data.name;
     await sql`
         UPDATE stock
         SET cached_live_data = ${data},
-            updated_at_live_data = NOW()
+            updated_at_live_data = NOW(),
+            name = ${name}
         WHERE abbreviation = ${abbreviation};
     `;
 }
