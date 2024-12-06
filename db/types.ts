@@ -22,5 +22,7 @@ export const StockSchema = z.object({
     timeSeries: z.array(TimeSeriesSchema).nullable().optional(),
     avg_sentiment: z.coerce.number().nullable().optional(),
     avg_bias: z.coerce.number().nullable().optional(),
+    last_updated_live: z.coerce.date().nullable().optional(),
+    last_updated_time_series: z.coerce.date().nullable().optional(),
 });
 export type Stock = z.infer<typeof StockSchema>;

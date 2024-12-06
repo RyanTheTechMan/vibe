@@ -41,7 +41,9 @@ export async function GET(request: NextRequest) {
                 stock.id,
                 ${startDate.toISOString()},
                 ${endDate.toISOString()}
-            ) AS bias_score
+            ) AS bias_score,
+            updated_at_live_data AS last_updated_live,
+            updated_at_time_series_data AS last_updated_time_series
         FROM stock
         ORDER BY
             sentiment_score DESC NULLS LAST,
@@ -75,6 +77,8 @@ export async function GET(request: NextRequest) {
                 ...(timeSeriesData && { timeSeries: timeSeriesData }),
                 avg_sentiment: stock.sentiment_score,
                 avg_bias: stock.bias_score,
+                last_updated_live: stock.last_updated_live,
+                last_updated_time_series: stock.last_updated_time_series,
             };
 
             const validatedStockData = StockSchema.parse(stockData);

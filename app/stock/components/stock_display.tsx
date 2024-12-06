@@ -12,14 +12,15 @@ import {
 import { Spinner } from '@nextui-org/spinner';
 import { useInfiniteScroll } from '@nextui-org/use-infinite-scroll';
 import { AsyncListData, useAsyncList } from '@react-stately/data';
-import { Stock } from '@/db/types';
+import {Stock, StockSchema} from '@/db/types';
 import { API_BASE_URL } from '@/app/api/route_helper';
 import { APIResponsePaginated, APIResponsePaginatedSchema } from '@/db/helpers';
 import { useRouter } from 'next/navigation';
 import { Avatar } from "@nextui-org/avatar";
 import MiniStockChart from "@/app/stock/components/mini-chart";
 import clsx from "clsx";
-import {FaChevronDown, FaChevronRight, FaChevronUp} from "react-icons/fa";
+import {FaChevronDown, FaChevronRight, FaChevronUp, FaRegClock} from "react-icons/fa";
+import {z} from "zod";
 
 export function StockTable() {
     const router = useRouter();
@@ -35,9 +36,9 @@ export function StockTable() {
                 const data: APIResponsePaginated = await APIResponsePaginatedSchema.parseAsync(await response.json());
 
                 setHasMore(data.nextCursor !== null);
-
+                const itemsFormatted: Stock[] = await z.array(StockSchema).parseAsync(data.content);
                 return {
-                    items: data.content,
+                    items: itemsFormatted,
                     cursor: data.nextCursor?.toString(),
                 };
             } catch (error) {
@@ -204,6 +205,51 @@ export function StockTable() {
         );
     };
 
+    const TimeAgo = ({ date }: { date: Date }): string => {
+        let timeAgo: string;
+        const diff = Date.now() - date.getTime();
+        const seconds = Math.floor(diff / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+
+        if (days > 0) {
+            timeAgo = `${days} day`;
+        } else if (hours > 0) {
+            timeAgo = `${hours} hour`;
+        } else if (minutes > 0) {
+            timeAgo = `${minutes} minute`;
+        } else {
+            timeAgo = `${seconds} second`;
+        }
+
+        if (days > 1 || hours > 1 || minutes > 1) {
+            timeAgo += 's';
+        }
+
+        timeAgo += ' ago'
+
+        return timeAgo;
+    };
+
+    // Helper function to format the last updated date
+    const formatLastUpdated = (lastUpdated: Date | null | undefined) => {
+        if (lastUpdated === null || lastUpdated === undefined) {
+            return <Spinner color='primary' size='sm' />;
+        }
+
+        return (
+            <span className="flex items-center space-x-1">
+                <span className="text-gray-500 text-xs">
+                    <FaRegClock />
+                </span>
+                <span className="text-gray-500 text-xs">
+                    <TimeAgo date={lastUpdated} />
+                </span>
+            </span>
+        );
+    };
+
     return (
         <Table
             aria-label="Stock Table"
@@ -236,6 +282,7 @@ export function StockTable() {
                 <TableColumn key="volume" align='start'>Volume</TableColumn>
                 <TableColumn key="sentiment" align='start'>Sentiment</TableColumn>
                 <TableColumn key="bias" align='start'>Bias</TableColumn>
+                <TableColumn key="last_updated" align='start'>Last Updated</TableColumn>
             </TableHeader>
             <TableBody
                 isLoading={isLoading}
@@ -306,7 +353,9 @@ export function StockTable() {
                         <TableCell>
                             {renderBias(stock.avg_bias)}
                         </TableCell>
-
+                        <TableCell>
+                            {formatLastUpdated((stock.last_updated_live ?? 0) > (stock.last_updated_time_series ?? 0) ? stock.last_updated_live : stock.last_updated_time_series)}
+                        </TableCell>
                     </TableRow>
                 )}
             </TableBody>
