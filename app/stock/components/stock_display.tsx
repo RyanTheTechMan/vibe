@@ -11,14 +11,15 @@ import {
 } from '@nextui-org/table';
 import { Spinner } from '@nextui-org/spinner';
 import { useInfiniteScroll } from '@nextui-org/use-infinite-scroll';
-import {AsyncListData, useAsyncList} from '@react-stately/data';
+import { AsyncListData, useAsyncList } from '@react-stately/data';
 import { Stock } from '@/db/types';
 import { API_BASE_URL } from '@/app/api/route_helper';
 import { APIResponsePaginated, APIResponsePaginatedSchema } from '@/db/helpers';
 import { useRouter } from 'next/navigation';
-import {Image} from "@nextui-org/image";
-import {BsFillQuestionCircleFill} from "react-icons/bs";
-import {Avatar} from "@nextui-org/avatar";
+import { Avatar } from "@nextui-org/avatar";
+import MiniStockChart from "@/app/stock/components/mini-chart";
+import clsx from "clsx";
+import {FaChevronDown, FaChevronRight, FaChevronUp} from "react-icons/fa";
 
 export function StockTable() {
     const router = useRouter();
@@ -59,6 +60,150 @@ export function StockTable() {
         }
     };
 
+    // Helper functions for formatting
+    const formatPrice = (price: number) => {
+        return `$${price.toFixed(2)}`;
+    };
+
+    const formatVolume = (volume: number) => {
+        return volume.toLocaleString();
+    };
+
+    // Helper function to determine color and icon for % Change with more steps
+    const getPercentChangeStyle = (percentChange: number) => {
+        if (percentChange < -5) {
+            return {
+                color: 'text-red-700', // Very Negative
+                Icon: FaChevronDown,
+            };
+        } else if (percentChange < -2) {
+            return {
+                color: 'text-red-500', // Negative
+                Icon: FaChevronDown,
+            };
+        } else if (percentChange < 5) {
+            return {
+                color: 'text-green-500', // Positive
+                Icon: FaChevronUp,
+            };
+        } else {
+            return {
+                color: 'text-green-500', // Very Positive
+                Icon: FaChevronUp,
+            };
+        }
+    };
+
+// Helper function to determine color and icon for Sentiment with more steps
+    const getSentimentStyle = (sentiment: number) => {
+        if (sentiment < -0.6) {
+            return {
+                color: 'text-red-700', // Very Negative
+                Icon: FaChevronDown,
+            };
+        } else if (sentiment < -0.1) {
+            return {
+                color: 'text-red-500', // Negative
+                Icon: FaChevronDown,
+            };
+        } else if (sentiment < 0.1) {
+            return {
+                color: 'text-yellow-500', // Neutral
+                Icon: FaChevronRight, // Indicating minimal sentiment
+            };
+        } else if (sentiment < 0.6) {
+            return {
+                color: 'text-green-500', // Positive
+                Icon: FaChevronUp,
+            };
+        } else {
+            return {
+                color: 'text-green-700', // Very Positive
+                Icon: FaChevronUp,
+            };
+        }
+    };
+
+// Helper function to determine color and icon for Bias with more steps
+    const getBiasStyle = (bias: number) => {
+        if (bias < 0.2) {
+            return {
+                color: 'text-green-700', // Very Low Bias
+                Icon: FaChevronDown,
+            };
+        } else if (bias < 0.4) {
+            return {
+                color: 'text-green-500', // Low Bias
+                Icon: FaChevronDown,
+            };
+        } else if (bias < 0.6) {
+            return {
+                color: 'text-yellow-700', // Moderate Bias
+                Icon: FaChevronRight, // Indicating balanced bias
+            };
+        } else if (bias < 0.8) {
+            return {
+                color: 'text-orange-500', // High Bias
+                Icon: FaChevronUp,
+            };
+        } else {
+            return {
+                color: 'text-red-700', // Very High Bias
+                Icon: FaChevronUp,
+            };
+        }
+    };
+
+    // Helper function to render % Change
+    const renderPercentChange = (percentChange: number | null | undefined) => {
+        if (percentChange === null || percentChange === undefined) {
+            return <Spinner color='primary' size='sm' />;
+        }
+
+        const { color, Icon } = getPercentChangeStyle(percentChange);
+
+        return (
+            <span className={clsx(color)} style={{ display: 'flex', alignItems: 'center' }}>
+                <Icon />
+                <span className="ml-1">{`${percentChange.toFixed(2)}%`}</span>
+            </span>
+        );
+    };
+
+    // Helper function to render Sentiment
+    const renderSentiment = (sentiment: number | null | undefined) => {
+        if (sentiment === null || sentiment === undefined) {
+            return <Spinner color='primary' size='sm' />;
+        }
+
+        const { color, Icon } = getSentimentStyle(sentiment);
+        const isPositive = sentiment >= 0;
+
+        return (
+            <span className={clsx(color)} style={{ display: 'flex', alignItems: 'center' }}>
+                <Icon />
+                <span className="ml-1">{sentiment.toFixed(2)}</span>
+            </span>
+        );
+    };
+
+    // Helper function to render Bias
+    const renderBias = (bias: number | null | undefined) => {
+        if (bias === null || bias === undefined) {
+            return <Spinner color='primary' size='sm' />;
+        }
+
+        const { color, Icon } = getBiasStyle(bias);
+        const isLowBias = bias < 0.5;
+
+        return (
+            <span className={clsx(color)} style={{ display: 'flex', alignItems: 'center' }}>
+                <Icon />
+                <span className="ml-1">{bias.toFixed(2)}</span>
+            </span>
+        );
+    };
+
     return (
         <Table
             aria-label="Stock Table"
@@ -67,7 +212,7 @@ export function StockTable() {
             bottomContent={
                 hasMore ? (
                     <div className="flex w-full justify-center py-4">
-                        <Spinner ref={loaderRef} color="primary"/>
+                        <Spinner ref={loaderRef} color="primary" />
                     </div>
                 ) : (
                     <div className="flex w-full justify-center py-4">
@@ -81,21 +226,24 @@ export function StockTable() {
             }}
         >
             <TableHeader>
-                <TableColumn key="id" width={40} align='center'>ID</TableColumn>
+                {/*<TableColumn key="id" width={40} align='center'>ID</TableColumn>*/}
                 <TableColumn key="abbreviation" width={40} align='center'>Abbreviation</TableColumn>
                 <TableColumn key='logo' width={76} align='center'>Logo</TableColumn>
                 <TableColumn key="name" align='start' width={40}>Name</TableColumn>
-                <TableColumn key="mini-chart" align='center'>Mini Chart</TableColumn>
-                <TableColumn key="price" align='end'>Price</TableColumn>
-                <TableColumn key="volume" align='end'>Volume</TableColumn>
+                <TableColumn key="percent_change" align='start' width={40}>% Change</TableColumn>
+                <TableColumn key="chart" align='center' width={120}>Price Chart (30d)</TableColumn>
+                <TableColumn key="price" align='start'>Price</TableColumn>
+                <TableColumn key="volume" align='start'>Volume</TableColumn>
+                <TableColumn key="sentiment" align='start'>Sentiment</TableColumn>
+                <TableColumn key="bias" align='start'>Bias</TableColumn>
             </TableHeader>
             <TableBody
                 isLoading={isLoading}
                 items={list.items}
                 loadingContent={
                     <TableRow>
-                        <TableCell colSpan={5} className="text-center">
-                            <Spinner color="primary"/>
+                        <TableCell colSpan={12} className="text-center">
+                            <Spinner color="primary" />
                         </TableCell>
                     </TableRow>
                 }
@@ -103,10 +251,12 @@ export function StockTable() {
                 {(stock: Stock) => (
                     <TableRow
                         key={stock.id}
-                        onClick={() => handleRowClick(stock.abbreviation)}
+                        onClick={() => handleRowClick(stock.abbreviation || '')}
                         className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
-                        <TableCell>{stock.id}</TableCell>
+                        {/*<TableCell>*/}
+                        {/*    <p className='text-yellow-600'>{stock.id}</p>*/}
+                        {/*</TableCell>*/}
                         <TableCell>{stock.abbreviation}</TableCell>
                         <TableCell>
                             <Avatar
@@ -115,17 +265,48 @@ export function StockTable() {
                                 showFallback
                                 size='md'
                                 radius='full'
-                                fallback={<Spinner color='primary' className='scale-75'/>}
+                                fallback={<Spinner color='primary' className='scale-75' />}
                             />
                         </TableCell>
                         <TableCell>{stock.name ?? 'N/A'}</TableCell>
                         <TableCell>
-                            <div className="w-full h-full">
-                                <Spinner color='warning'/>
-                            </div>
+                            {renderPercentChange(stock.percent_change)}
                         </TableCell>
-                        <TableCell>{stock.price ?? 'N/A'}</TableCell>
-                        <TableCell>{stock.volume ?? 'N/A'}</TableCell>
+                        <TableCell>
+                            {stock.timeSeries && stock.timeSeries.length > 0 ? (
+                                <MiniStockChart
+                                    width={120}
+                                    height={50}
+                                    lines={[{
+                                        id: stock.abbreviation || 'line1',
+                                        data: stock.timeSeries.map(point => ({
+                                            date: new Date(point.datetime).toISOString(), // Convert Date to ISO string
+                                            close: point.close,
+                                        })),
+                                        strokeColor: stock.percent_change! >= 0 ? '#359bd8' : '#e53e3e',
+                                    }]}
+                                />
+                            ) : (
+                                <div className="text-gray-500 text-xs">No chart data</div>
+                            )}
+                        </TableCell>
+                        <TableCell>
+                            {stock.price !== null && stock.price !== undefined
+                                ? formatPrice(stock.price)
+                                : <Spinner color='primary' size='sm' />}
+                        </TableCell>
+                        <TableCell>
+                            {stock.volume !== null && stock.volume !== undefined
+                                ? formatVolume(stock.volume)
+                                : <Spinner color='primary' size='sm' />}
+                        </TableCell>
+                        <TableCell>
+                            {renderSentiment(stock.avg_sentiment)}
+                        </TableCell>
+                        <TableCell>
+                            {renderBias(stock.avg_bias)}
+                        </TableCell>
+
                     </TableRow>
                 )}
             </TableBody>

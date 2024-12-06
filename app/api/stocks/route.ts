@@ -1,37 +1,93 @@
 import { NextRequest } from 'next/server';
 import { sql } from '@/db/db';
-import {errorResponse, successResponsePaginated} from '@/db/helpers';
+import { errorResponse, successResponsePaginated } from '@/db/helpers';
 import { z } from 'zod';
+import {
+    fetchLiveData,
+    fetchTimeSeriesData,
+    LiveData,
+} from './cache';
+import {Stock, StockSchema} from '@/db/types';
 
 export const runtime = 'edge';
-
-const StockFiltersSchema = z.object({
-    cursor: z.coerce.number().int().optional(),
-});
-type StockFilters = z.infer<typeof StockFiltersSchema>;
 
 /* ----------------------- GET Handler ----------------------- */
 
 export async function GET(request: NextRequest) {
     try {
-        const filters: StockFilters = StockFiltersSchema.parse(Object.fromEntries(new URL(request.url).searchParams.entries()));
+        const filters = z.object({
+            cursor: z.coerce.number().int().optional(),
+        }).parse(Object.fromEntries(new URL(request.url).searchParams.entries()));
 
-        const pageSize = 10;
-        let start: number = isNaN(filters.cursor as number) ? 0 : filters.cursor as number;
+        const pageSize = 4; // Adjust as needed
+        const start: number = isNaN(filters.cursor as number) ? 0 : (filters.cursor as number);
 
-        const result = await sql`
-            SELECT *
-            FROM stock
-            LIMIT ${pageSize} OFFSET ${start};
-    `;
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 30);
 
-        const nextCursor: number | null = start + pageSize < (await getTotalStocks()) ? start + pageSize : null;
+        const endDate = new Date();
 
-        // await new Promise(resolve => setTimeout(resolve, 500));
+        const staticResult = await sql`
+        SELECT
+            id,
+            abbreviation,
+            name,
+            GetStockSentimentScore(
+                stock.id,
+                ${startDate.toISOString()},
+                ${endDate.toISOString()}
+            ) AS sentiment_score,
+            GetStockBiasScore(
+                stock.id,
+                ${startDate.toISOString()},
+                ${endDate.toISOString()}
+            ) AS bias_score
+        FROM stock
+        ORDER BY
+            sentiment_score DESC NULLS LAST,
+            bias_score ASC
+        LIMIT ${pageSize}
+        OFFSET ${start};
+        `;
 
-        return successResponsePaginated(result, nextCursor, undefined, 200);
+        if (staticResult.length === 0) {
+            return successResponsePaginated([], null, undefined, 200);
+        }
+
+        const combinedResult = [];
+
+        for (const stock of staticResult) {
+            const liveData: LiveData | null = await fetchLiveData(stock.abbreviation);
+
+            const timeSeriesData = await fetchTimeSeriesData(stock.abbreviation, '1day', 30);
+
+            const stockData: Stock = {
+                id: stock.id,
+                abbreviation: stock.abbreviation,
+                name: stock.name,
+                price: liveData?.price,
+                volume: liveData?.volume,
+                open: liveData?.open,
+                high: liveData?.high,
+                low: liveData?.low,
+                change: liveData?.change,
+                percent_change: liveData?.percent_change,
+                ...(timeSeriesData && { timeSeries: timeSeriesData }),
+                avg_sentiment: stock.sentiment_score,
+                avg_bias: stock.bias_score,
+            };
+
+            const validatedStockData = StockSchema.parse(stockData);
+
+            combinedResult.push(validatedStockData);
+        }
+
+        const totalStocks = await getTotalStocks();
+        const nextCursor: number | null = start + pageSize < totalStocks ? start + pageSize : null;
+
+        return successResponsePaginated(combinedResult, nextCursor, undefined, 200);
     } catch (error: any) {
-        console.error('Error fetching Stock:', error);
+        console.error('Error fetching Stocks:', error);
         return errorResponse('Server error while fetching Stocks.', 500, error);
     }
 }
