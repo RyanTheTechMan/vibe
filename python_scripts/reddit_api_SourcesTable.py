@@ -82,13 +82,6 @@ def fetch_existing_stocks():
 
 # Add a new stock to the database
 def insert_new_stock(abbreviation):
-    """
-    Insert a new stock into the stock table if it doesn't exist.
-    Args:
-        abbreviation (str): The stock abbreviation (e.g., "AAPL").
-    Returns:
-        int: The ID of the newly added stock.
-    """
     try:
         with psycopg.connect(os.getenv("DATABASE_URL")) as conn:
             with conn.cursor() as cur:
@@ -108,13 +101,6 @@ def insert_new_stock(abbreviation):
 
 # Add stock and source to the `stocks_source` table
 def insert_into_stocks_source(stock_id, source_id):
-    """
-    Insert a record into the stocks_source table.
-
-    Args:
-        stock_id (int): The ID of the stock.
-        source_id (int): The ID of the source.
-    """
     try:
         with psycopg.connect(os.getenv("DATABASE_URL")) as conn:
             with conn.cursor() as cur:

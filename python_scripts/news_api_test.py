@@ -2,9 +2,12 @@ import yfinance as yf
 import openai
 from textblob import TextBlob
 import pandas as pd
+from dotenv import load_dotenv
 import os
 
 #API for GPT
+load_dotenv()
+
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 #Articles that were already processed
