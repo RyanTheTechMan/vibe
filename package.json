@@ -28,7 +28,7 @@
 		"@nextui-org/spacer": "^2.0.33",
 		"@nextui-org/spinner": "2.0.34",
 		"@nextui-org/switch": "2.0.34",
-		"@nextui-org/system": "2.2.6",
+		"@nextui-org/system": "^2.4.1",
 		"@nextui-org/table": "^2.0.40",
 		"@nextui-org/theme": "2.2.11",
 		"@nextui-org/use-infinite-scroll": "^2.1.5",
