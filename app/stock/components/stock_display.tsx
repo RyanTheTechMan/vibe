@@ -95,7 +95,7 @@ export function StockTable() {
         }
     };
 
-// Helper function to determine color and icon for Sentiment with more steps
+    // Helper function to determine color and icon for Sentiment with more steps
     const getSentimentStyle = (sentiment: number) => {
         if (sentiment < -0.6) {
             return {
@@ -125,7 +125,7 @@ export function StockTable() {
         }
     };
 
-// Helper function to determine color and icon for Bias with more steps
+    // Helper function to determine color and icon for Bias with more steps
     const getBiasStyle = (bias: number) => {
         if (bias < 0.2) {
             return {
@@ -195,7 +195,6 @@ export function StockTable() {
         }
 
         const { color, Icon } = getBiasStyle(bias);
-        const isLowBias = bias < 0.5;
 
         return (
             <span className={clsx(color)} style={{ display: 'flex', alignItems: 'center' }}>
