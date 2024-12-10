@@ -27,7 +27,6 @@ export default function StockInfo({ stock }: StockInfoProps) {
 
     return (
         <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {/* Stock Info Card */}
             <Card>
                 <CardHeader style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
@@ -53,7 +52,6 @@ export default function StockInfo({ stock }: StockInfoProps) {
 
             <Spacer y={1.5} />
 
-            {/* Detailed Stock Chart Card */}
             <Card>
                 <DetailedStockChart
                     lines={chartLines}
@@ -61,8 +59,6 @@ export default function StockInfo({ stock }: StockInfoProps) {
                     height={400}
                 />
             </Card>
-
-            {/* Additional sections can go here */}
         </div>
     );
 }

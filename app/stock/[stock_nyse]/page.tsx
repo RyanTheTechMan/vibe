@@ -1,4 +1,3 @@
-// app/stock/[stock_nyse]/page.tsx
 import React from 'react';
 import { fetchStockData } from './components/fetchStockData';
 import { Stock } from '@/db/types';
